@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Custom Socket Server</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            width: 400px;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-card h2 {
+            margin-bottom: 30px;
+            color: #2d3436;
+            font-weight: 600;
+            font-size: 1.8rem;
+        }
+
+        .input-group {
+            margin-bottom: 22px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: #636e72;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: #fafafa;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #a18cd1;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(161, 140, 209, 0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+        }
+
+        .btn-submit:hover {
+            background: #5f27cd;
+            transform: translateY(-2px);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 30px 0;
+            color: #b2bec3;
+            font-size: 0.9rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #dfe6e9;
+        }
+
+        .divider:not(:empty)::before {
+            margin-right: .5em;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: .5em;
+        }
+
+        .btn-google {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 14px;
+            background: white;
+            color: #2d3436;
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-google img {
+            width: 22px;
+            margin-right: 12px;
+        }
+
+        .btn-google:hover {
+            background: #f8f9fa;
+            border-color: #b2bec3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <h2>Xin chào!</h2>
+        <form method="POST" action="/login">
+            <div class="input-group">
+                <label>Tài khoản</label>
+                <input type="text" name="username" placeholder="Vd: nntu" required autocomplete="off" />
+            </div>
+            <div class="input-group">
+                <label>Mật khẩu</label>
+                <input type="password" name="password" placeholder="••••••••" required />
+            </div>
+            <button type="submit" class="btn-submit">Đăng nhập ngay</button>
+        </form>
+
+        <div class="divider">HOẶC LỰA CHỌN KHÁC</div>
+
+        <!-- Tích hợp nút Firebase Google Sign In -->
+        <button id="btn-google-login" type="button" class="btn-google" style="cursor: pointer;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" />
+            Sign in with Google
+        </button>
+    </div>
+
+    <!-- Tích hợp Client Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+        import { firebaseConfig } from "./firebase-config.js";
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        document.getElementById('btn-google-login').addEventListener('click', () => {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    // Trích xuất email từ Object User của Firebase
+                    const email = result.user.email;
+
+                    // Gửi email đó ngược lên C# Web Server nội bộ để xin cấp Session Token (Raw Sockets)
+                    fetch('/api/auth/google', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'email=' + encodeURIComponent(email)
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.href = '/chat';
+                            } else {
+                                alert('Session trên Server bị lỗi!');
+                            }
+                        })
+                        .catch(err => alert('Failed to connect with Socket API.'));
+                })
+                .catch((error) => {
+                    console.error("Firebase Auth Error:", error);
+                    alert("Firebase Exception: " + error.message);
+                });
+        });
+    </script>
+</body>
+
+</html>

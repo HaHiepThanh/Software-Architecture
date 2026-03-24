@@ -1,0 +1,14 @@
+/Users/thanhhhtt/repos/2533/sa/CustomWebServer/bin/Debug/net8.0/CustomWebServer
+/Users/thanhhhtt/repos/2533/sa/CustomWebServer/bin/Debug/net8.0/CustomWebServer.deps.json
+/Users/thanhhhtt/repos/2533/sa/CustomWebServer/bin/Debug/net8.0/CustomWebServer.runtimeconfig.json
+/Users/thanhhhtt/repos/2533/sa/CustomWebServer/bin/Debug/net8.0/CustomWebServer.dll
+/Users/thanhhhtt/repos/2533/sa/CustomWebServer/bin/Debug/net8.0/CustomWebServer.pdb
+/Users/thanhhhtt/repos/2533/sa/CustomWebServer/obj/Debug/net8.0/CustomWebServer.GeneratedMSBuildEditorConfig.editorconfig
+/Users/thanhhhtt/repos/2533/sa/CustomWebServer/obj/Debug/net8.0/CustomWebServer.AssemblyInfoInputs.cache
+/Users/thanhhhtt/repos/2533/sa/CustomWebServer/obj/Debug/net8.0/CustomWebServer.AssemblyInfo.cs
+/Users/thanhhhtt/repos/2533/sa/CustomWebServer/obj/Debug/net8.0/CustomWebServer.csproj.CoreCompileInputs.cache
+/Users/thanhhhtt/repos/2533/sa/CustomWebServer/obj/Debug/net8.0/CustomWebServer.dll
+/Users/thanhhhtt/repos/2533/sa/CustomWebServer/obj/Debug/net8.0/refint/CustomWebServer.dll
+/Users/thanhhhtt/repos/2533/sa/CustomWebServer/obj/Debug/net8.0/CustomWebServer.pdb
+/Users/thanhhhtt/repos/2533/sa/CustomWebServer/obj/Debug/net8.0/CustomWebServer.genruntimeconfig.cache
+/Users/thanhhhtt/repos/2533/sa/CustomWebServer/obj/Debug/net8.0/ref/CustomWebServer.dll

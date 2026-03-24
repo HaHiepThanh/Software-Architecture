@@ -1,0 +1,35 @@
+# C# CUSTOM WEB SERVER PROJECT INSTRUCTIONS
+
+## 1. CORE CONSTRAINTS (CRITICAL)
+- DO NOT use ASP.NET Core, Kestrel, or any built-in web frameworks.
+- The server MUST be built entirely from scratch using ONLY `System.Net.Sockets` and `System.Net.Sockets.TcpListener`.
+- You must manually implement the HTTP protocol parser (parsing Methods, URLs, Headers, Cookies, and Body).
+- ALL data (user accounts, chat histories, room statuses) MUST be stored strictly in `.json` format. Do not use databases or `.txt` files.
+
+## 2. REQUIRED ENDPOINTS & LOGIC
+Must implement the exact RESTful API endpoints as following:
+1. `GET /`: Displays detailed student information (id, fullname, PC's number) and provides a link to login.
+2. `GET /login`: Shows the login page. Must include a standard login form AND a "Login with Google" option.
+3. `POST /login`: Logs in with username and password. Validates against the user JSON file. 
+   - Success: Generate an auth token, implement cookie storage to save this token, and redirect to `/chat`.
+   - Failure: Displays a login failed message.
+4. `GET /auth/google/callback` (or similar endpoint): Handle the Google Login OAuth flow. Upon successful authentication with Google, generate a token, implement cookie storage, and redirect to `/chat`.
+5. `GET /chat`: Displays online and offline chat rooms. 
+   - A chat room is online if it has had activity within the last 3 minutes. 
+   - If offline, its history is cleared.
+6. `POST /chat/:id`: Sends a message to the chat room with the given id. After sending, changes the room status to online and redirects to `GET /chat/:id`.
+7. `GET /chat/:id`: Retrieves all messages sent to the chat room in chronological order (time, username, message). 
+
+## 3. DATA STORAGE SCHEMA
+- User accounts must be stored in a JSON file exact to this format:
+  [ { "username": "nntu", "password": "56789" } , { "username": "AdTekDev", "password": "56789" }  ]
+- Chat histories MUST be stored in JSON files.
+
+## 4. DESIGN PATTERNS (MANDATORY)
+You MUST apply the following design patterns correctly in the C# code:
+- Singleton Pattern: Apply to the class reading JSON content to ensure safe concurrent file access.
+- Builder Pattern: Use to Create & Render Chat (themes) to WebRouter.
+
+## 5. UI/UX & FOLDER STRUCTURE
+- Ensure the website has an attractive design.
+- Separate the project logic clearly: a C# server application and a dedicated HTML folder for frontend views (to meet the submission requirement of zipping the C# server and an HTML folder).
