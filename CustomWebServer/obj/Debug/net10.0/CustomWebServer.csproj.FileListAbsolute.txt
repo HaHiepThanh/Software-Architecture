@@ -12,3 +12,4 @@
 /Users/thanhhhtt/repos/2533/sa/CustomWebServer/obj/Debug/net10.0/CustomWebServer.pdb
 /Users/thanhhhtt/repos/2533/sa/CustomWebServer/obj/Debug/net10.0/CustomWebServer.genruntimeconfig.cache
 /Users/thanhhhtt/repos/2533/sa/CustomWebServer/obj/Debug/net10.0/ref/CustomWebServer.dll
+/Users/thanhhhtt/repos/2533/sa/CustomWebServer/obj/Debug/net10.0/CustomWebServer.sourcelink.json

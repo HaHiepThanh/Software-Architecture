@@ -139,6 +139,28 @@
             background: #f8f9fa;
             border-color: #b2bec3;
         }
+
+        /* --- STYLES DÀNH CHO POPUP REGISTER --- */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center; z-index: 1000;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .overlay.active { opacity: 1; pointer-events: auto; }
+        .popup-card {
+            background: white; width: 380px; padding: 35px; text-align: left;
+            border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            position: relative; transform: translateY(-20px); transition: transform 0.3s ease;
+        }
+        .overlay.active .popup-card { transform: translateY(0); }
+        .popup-close { 
+            position: absolute; top: 20px; right: 20px; cursor: pointer; 
+            font-size: 1.5rem; background: none; border: none; color: #a4b0be; transition: color 0.2s;
+        }
+        .popup-close:hover { color: #2f3542; }
+        .text-link { color: #6c5ce7; font-size: 0.95rem; text-decoration: none; cursor: pointer; font-weight: 600; padding:5px;}
+        .text-link:hover { text-decoration: underline; color: #5f27cd;}
     </style>
 </head>
 
@@ -164,7 +186,43 @@
             <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" />
             Sign in with Google
         </button>
+
+        <p style="margin-top: 25px; font-size: 0.95rem; color: #636e72;">
+            Lần đầu tới đây? <a class="text-link" onclick="openPopup()">Tạo tài khoản ngay</a>
+        </p>
     </div>
+
+    <!-- KHỐI HTML POPUP ĐĂNG KÝ (Bị ẩn mặc định) -->
+    <div class="overlay" id="register-overlay">
+        <div class="popup-card">
+            <button class="popup-close" onclick="closePopup()">&times;</button>
+            <h2 style="margin-bottom: 25px; font-size: 1.6rem; color: #2d3436; font-weight: 600; text-align: center;">Tạo tài khoản mới</h2>
+            
+            <form method="POST" action="/register">
+                <div class="input-group">
+                    <label>Tên đăng nhập muốn thiết lập</label>
+                    <input type="text" name="username" placeholder="Ví dụ: nntu_new" required autocomplete="off" />
+                </div>
+                <div class="input-group">
+                    <label>Mật khẩu an toàn</label>
+                    <input type="password" name="password" placeholder="••••••••" required />
+                </div>
+                <button type="submit" class="btn-submit" style="margin-top: 15px;">Đăng ký & Đăng nhập ngay</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPT ĐIỀU KHIỂN POPUP -->
+    <script>
+        const overlay = document.getElementById('register-overlay');
+        function openPopup() { overlay.classList.add('active'); }
+        function closePopup() { overlay.classList.remove('active'); }
+        
+        // Đóng khi click ngoài Popup form (Kẻ bị mờ đi phía sau)
+        overlay.addEventListener('click', (e) => {
+            if(e.target === overlay) closePopup();
+        });
+    </script>
 
     <!-- Tích hợp Client Firebase SDK -->
     <script type="module">

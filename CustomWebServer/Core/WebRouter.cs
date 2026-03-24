@@ -23,6 +23,7 @@ namespace CustomWebServer.Core
             if (request.Method == "GET" && path == "/") return HandleHome(request);
             if (request.Method == "GET" && path == "/login") return HandleGetLogin(request);
             if (request.Method == "POST" && path == "/login") return HandlePostLogin(request);
+            if (request.Method == "POST" && path == "/register") return HandlePostRegister(request);
 
             // STEP 6 (Firebase): Endpoint nhận thông tin từ Client Firebase
             if (request.Method == "POST" && path == "/api/auth/google") return HandleFirebaseGoogleLogin(request);
@@ -271,6 +272,36 @@ namespace CustomWebServer.Core
                 </form>
                 <hr/><a href='/auth/google/login'>Mock Google Login Bypass</a>";
             return HttpResponse.HtmlResponse(html);
+        }
+
+        // --- LOGIC TẠO TÀI KHOẢN (REGISTER) ---
+        private HttpResponse HandlePostRegister(HttpRequest request)
+        {
+            var postData = ParseUrlEncodedBody(request.Body);
+            string username = postData.ContainsKey("username") ? postData["username"] : "";
+            string password = postData.ContainsKey("password") ? postData["password"] : "";
+
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            {
+                return HttpResponse.HtmlResponse("<h1>Lỗi</h1><p>Dữ liệu trống, vui lòng thử lại.</p><a href='/login'>Quay lại</a>", 400);
+            }
+
+            // Gọi JsonDataManager để kiểm tra và lưu user
+            bool isSuccess = JsonDataManager.Instance.RegisterUser(username, password);
+
+            if (isSuccess)
+            {
+                // Đăng ký xong, tự động đăng nhập và redirect về chat
+                string token = SessionManager.CreateSession(username);
+                var response = HttpResponse.Redirect("/chat");
+                response.SetCookie("auth_token", token, 180);
+                return response;
+            }
+            else
+            {
+                // Trả về lỗi 409 Conflict
+                return HttpResponse.HtmlResponse("<h1>Đăng ký thất bại</h1><p>Tên tài khoản này đã được sử dụng!</p><a href='/login'>Quay lại trang Đăng nhập</a>", 409);
+            }
         }
 
         private HttpResponse HandlePostLogin(HttpRequest request)

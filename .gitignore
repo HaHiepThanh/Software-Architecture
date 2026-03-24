@@ -1,1 +1,19 @@
+# Mac OS
+.DS_Store
+
+# .NET Build Folders
+[Bb]in/
+[Oo]bj/
+
+# IDE files
+.vscode/
+.vs/
+*.user
+
+# Firebase SDK Keys / Secrets
 firebase-config.js
+CustomWebServer/HTML/firebase-config.js
+
+# Cơ sở dữ liệu Cục bộ của Server (Chống lộ Data Chat/Users lên GitHub)
+CustomWebServer/Data/users.json
+CustomWebServer/Data/chats/

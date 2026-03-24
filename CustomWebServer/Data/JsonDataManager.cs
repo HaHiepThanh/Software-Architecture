@@ -49,6 +49,36 @@ namespace CustomWebServer.Data
             }
         }
 
+        public bool RegisterUser(string username, string password)
+        {
+            _rwLock.EnterWriteLock();
+            try
+            {
+                List<User> users = new List<User>();
+                if (File.Exists(_usersFilePath))
+                {
+                    string json = File.ReadAllText(_usersFilePath);
+                    var existing = JsonSerializer.Deserialize<List<User>>(json);
+                    if (existing != null) users = existing;
+                }
+
+                // Chặn trùng lặp Username (So sánh không phân biệt hoa thường)
+                foreach (var u in users)
+                {
+                    if (u.Username.Equals(username, StringComparison.OrdinalIgnoreCase))
+                        return false; 
+                }
+
+                users.Add(new User { Username = username, Password = password });
+                File.WriteAllText(_usersFilePath, JsonSerializer.Serialize(users));
+                return true;
+            }
+            finally
+            {
+                _rwLock.ExitWriteLock();
+            }
+        }
+
         public bool ValidateUser(string username, string password)
         {
             _rwLock.EnterReadLock();
