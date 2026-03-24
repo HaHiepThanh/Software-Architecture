@@ -7,13 +7,15 @@ namespace CustomWebServer.Core
     public class WebRouter
     {
         // STEP 5: Cấu trúc dữ liệu ghi nhận hoạt động của phòng
-        // Giả lập sẵn 2 phòng: room1 online, room2 đã offline do quá 5 phút
+        // Cấu trúc dữ liệu ghi nhận hoạt động của phòng
         private static Dictionary<string, DateTime> _roomActivities = new Dictionary<string, DateTime>
         {
-            { "room1", DateTime.Now },
-            { "room2", DateTime.Now.AddMinutes(-5) }
+            { "all", DateTime.Now }
         };
-        private static Dictionary<string, string> _roomNames = new Dictionary<string, string>();
+        private static Dictionary<string, string> _roomNames = new Dictionary<string, string>
+        {
+            { "all", "Phòng Toàn Cầu (All)" }
+        };
         private static Dictionary<string, HashSet<string>> _roomUsers = new Dictionary<string, HashSet<string>>();
 
         public HttpResponse Route(HttpRequest request)
@@ -158,7 +160,7 @@ namespace CustomWebServer.Core
             </div>
         </div>
 
-        <div class='section-title'>Các phòng đang mở hiện tại</div>
+        <div class='section-title'>Các phòng khả dụng</div>
         <ul class='room-list'>";
             
             var keys = new List<string>(_roomActivities.Keys);
@@ -168,15 +170,15 @@ namespace CustomWebServer.Core
                 var lastActivity = _roomActivities[roomId];
                 
                 // Toán tử kiểm tra sự kiện: DateTime.Now - LastActivityTime > 3 phút
-                if ((DateTime.Now - lastActivity).TotalMinutes > 3)
+                if (roomId != "all" && (DateTime.Now - lastActivity).TotalMinutes > 3)
                 {
                     // Dọn dẹp JSON
                     JsonDataManager.Instance.ClearRoomHistory(roomId);
                 }
                 else
                 {
-                    // CHỈ hiển thị phòng nếu User hiện tại đã Tạo hoặc Join phòng này
-                    bool isJoined = _roomUsers.ContainsKey(roomId) && _roomUsers[roomId].Contains(currentUser);
+                    // CHỈ hiển thị phòng nếu User hiện tại đã Tạo hoặc Join phòng này (ngoại trừ phòng "all")
+                    bool isJoined = roomId == "all" || (_roomUsers.ContainsKey(roomId) && _roomUsers[roomId].Contains(currentUser));
                     if (isJoined)
                     {
                         hasActive = true;
@@ -260,10 +262,12 @@ namespace CustomWebServer.Core
             // BƯỚC 7: ÁP DỤNG MẪU THIẾT KẾ BUILDER PATTERN
             var builder = new CustomWebServer.Views.ChatHtmlBuilder();
             string roomName = _roomNames.ContainsKey(roomId) ? _roomNames[roomId] : $"Phòng {roomId}";
+            string headerTitle = $"{roomName} <small style='font-size: 0.8rem; font-weight: 400; opacity: 0.85; margin-left: 8px; background: rgba(0,0,0,0.15); padding: 3px 8px; border-radius: 10px;'>ID: {roomId}</small>";
+            
             string html = builder
                 .SetTheme("#6c5ce7") // Màu sắc Theme Custom
                 .SetCurrentUser(currentUser)
-                .AddHeader(roomName)
+                .AddHeader(headerTitle)
                 .AddMessageList(history)
                 .AddInputForm(roomId) // Tích hợp JavaScript Interval và AJAX tích hợp sẵn
                 .Build();
