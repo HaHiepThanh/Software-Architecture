@@ -157,7 +157,8 @@ namespace CustomWebServer.Core
 
         private HttpResponse HandleGetChatRoom(HttpRequest request, string roomId)
         {
-            if (!IsLoggedIn(request)) return HttpResponse.Redirect("/login");
+            string currentUser = GetUsername(request);
+            if (currentUser == null) return HttpResponse.Redirect("/login");
             
             var history = JsonDataManager.Instance.GetChatHistory(roomId);
             
@@ -165,6 +166,7 @@ namespace CustomWebServer.Core
             var builder = new CustomWebServer.Views.ChatHtmlBuilder();
             string html = builder
                 .SetTheme("#6c5ce7") // Màu sắc Theme Custom
+                .SetCurrentUser(currentUser)
                 .AddHeader($"Phòng Trò Chuyện {roomId}")
                 .AddMessageList(history)
                 .AddInputForm(roomId) // Tích hợp JavaScript Interval và AJAX tích hợp sẵn
@@ -179,14 +181,14 @@ namespace CustomWebServer.Core
 
         private HttpResponse HandleFirebaseGoogleLogin(HttpRequest request)
         {
-            // Trích xuất email được gửi từ Firebase qua JS Client
+            // Trích xuất Tên (DisplayName) được gửi từ Firebase qua JS Client
             var postData = ParseUrlEncodedBody(request.Body);
-            string email = postData.ContainsKey("email") ? postData["email"] : "";
+            string username = postData.ContainsKey("username") ? postData["username"] : "";
 
-            if (!string.IsNullOrEmpty(email))
+            if (!string.IsNullOrEmpty(username))
             {
                 // Cấp Token Server nội bộ cho User Firebase
-                string token = SessionManager.CreateSession(email);
+                string token = SessionManager.CreateSession(username);
                 var response = HttpResponse.JsonResponse("{\"success\":true}");
                 response.SetCookie("auth_token", token, 180); 
                 return response;

@@ -8,6 +8,7 @@ namespace CustomWebServer.Views
     {
         private StringBuilder _html;
         private string _themeColor = "#3498db"; 
+        private string _currentUser = "";
 
         public ChatHtmlBuilder()
         {
@@ -28,7 +29,10 @@ namespace CustomWebServer.Views
                     .chat-messages { flex: 1; padding: 20px; overflow-y: auto; background: #fdfdfd; display: flex; flex-direction: column; gap: 15px; }
                     .message { padding: 12px 18px; border-radius: 20px; max-width: 75%; position: relative; font-size: 0.95rem; line-height: 1.5; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
                     .message.system { align-self: center; background: #f1f2f6; color: #7f8fa6; border-radius: 8px; font-size: 0.85rem; box-shadow: none; padding: 8px 15px; }
-                    .message.user { align-self: flex-start; background: #ffffff; border: 1px solid #eee; color: #2f3542; border-bottom-left-radius: 4px; }
+                    .message.user { align-self: flex-start; background: #ffffff; border: 1px solid #eee; color: #2f3542; border-bottom-left-radius: 4px; border-bottom-right-radius: 20px;}
+                    .message.user.me { align-self: flex-end; background: THEME_COLOR; color: white; border: none; border-bottom-right-radius: 4px; border-bottom-left-radius: 20px;}
+                    .message.user.me .message-username { color: rgba(255,255,255,0.95); }
+                    .message.user.me .message-time { color: #a4b0be; left: -40px; right: auto; }
                     .message-username { font-weight: 600; color: THEME_COLOR; margin-bottom: 4px; display: block; font-size: 0.85rem; }
                     .message-time { font-size: 0.7rem; color: #a4b0be; position: absolute; right: -40px; bottom: 5px; }
                     .chat-form { display: flex; padding: 15px 20px; background: white; border-top: 1px solid #f1f2f6; align-items: center; gap: 10px; }
@@ -44,6 +48,12 @@ namespace CustomWebServer.Views
         {
             _themeColor = color;
             _html.Replace("THEME_COLOR", color); // Replaces all CSS placeholders dynamically
+            return this;
+        }
+
+        public ChatHtmlBuilder SetCurrentUser(string username)
+        {
+            _currentUser = username;
             return this;
         }
 
@@ -69,8 +79,11 @@ namespace CustomWebServer.Views
             {
                 foreach (var msg in messages)
                 {
-                    _html.Append("<div class='message user'>");
-                    _html.Append($"<span class='message-username'>{msg.Username}</span>");
+                    bool isMe = msg.Username.Equals(_currentUser, System.StringComparison.OrdinalIgnoreCase);
+                    string cssClass = isMe ? "message user me" : "message user";
+
+                    _html.Append($"<div class='{cssClass}'>");
+                    _html.Append($"<span class='message-username'>{msg.Username}{(isMe ? " (Bạn)" : "")}</span>");
                     _html.Append($"<span class='message-text'>{msg.Message}</span>");
                     _html.Append($"<span class='message-time'>{msg.Time.ToLocalTime():HH:mm}</span>");
                     _html.Append("</div>");

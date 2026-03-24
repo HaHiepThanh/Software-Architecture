@@ -237,14 +237,14 @@
         document.getElementById('btn-google-login').addEventListener('click', () => {
             signInWithPopup(auth, provider)
                 .then((result) => {
-                    // Trích xuất email từ Object User của Firebase
-                    const email = result.user.email;
+                    // Trích xuất Tên người dùng (Display Name) thay vì Email
+                    const displayName = result.user.displayName || result.user.email.split('@')[0];
 
-                    // Gửi email đó ngược lên C# Web Server nội bộ để xin cấp Session Token (Raw Sockets)
+                    // Gửi Name đó ngược lên C# Web Server nội bộ để xin cấp Session Token (Raw Sockets)
                     fetch('/api/auth/google', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: 'email=' + encodeURIComponent(email)
+                        body: 'username=' + encodeURIComponent(displayName)
                     })
                         .then(res => res.json())
                         .then(data => {
