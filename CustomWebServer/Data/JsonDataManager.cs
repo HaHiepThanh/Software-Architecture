@@ -121,7 +121,8 @@ namespace CustomWebServer.Data
                 history.Add(new ChatMessage { Time = DateTime.UtcNow, Username = username, Message = message });
                 File.WriteAllText(roomFile, JsonSerializer.Serialize(history));
                 
-                File.WriteAllText(Path.Combine(_chatDir, $"room_{roomId}_activity.txt"), DateTime.UtcNow.ToString("o"));
+                string activityJson = JsonSerializer.Serialize(new { LastActivity = DateTime.UtcNow });
+                File.WriteAllText(Path.Combine(_chatDir, $"room_{roomId}_activity.json"), activityJson);
             }
             finally
             {
@@ -144,7 +145,7 @@ namespace CustomWebServer.Data
         public void ClearRoomHistory(string roomId)
         {
             string roomFile = Path.Combine(_chatDir, $"room_{roomId}.json");
-            string activityFile = Path.Combine(_chatDir, $"room_{roomId}_activity.txt");
+            string activityFile = Path.Combine(_chatDir, $"room_{roomId}_activity.json");
 
             _rwLock.EnterWriteLock();
             try

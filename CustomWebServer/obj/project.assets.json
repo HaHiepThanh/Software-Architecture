@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/thanhhhtt/repos/2533/sa/CustomWebServer/CustomWebServer.csproj",
+      "projectUniqueName": "/Users/thanhhhtt/repos/2533/sa/test/CustomWebServer/CustomWebServer.csproj",
       "projectName": "CustomWebServer",
-      "projectPath": "/Users/thanhhhtt/repos/2533/sa/CustomWebServer/CustomWebServer.csproj",
+      "projectPath": "/Users/thanhhhtt/repos/2533/sa/test/CustomWebServer/CustomWebServer.csproj",
       "packagesPath": "/Users/thanhhhtt/.nuget/packages/",
-      "outputPath": "/Users/thanhhhtt/repos/2533/sa/CustomWebServer/obj/",
+      "outputPath": "/Users/thanhhhtt/repos/2533/sa/test/CustomWebServer/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/thanhhhtt/.nuget/NuGet/NuGet.Config"
