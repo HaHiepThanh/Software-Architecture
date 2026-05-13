@@ -21,7 +21,7 @@ namespace CustomWebServer.Views
             _html.Append(@"
                 <style>
                     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-                    body { font-family: 'Inter', sans-serif; background: #eef2f5; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+                    body { font-family: 'Inter', sans-serif; background-color: #f9f6f0; background-image: linear-gradient(to right, #e8e4db 1px, transparent 1px), linear-gradient(to bottom, #e8e4db 1px, transparent 1px); background-size: 30px 30px; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
                     .chat-container { width: 100%; max-width: 600px; height: 85vh; background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; overflow: hidden; }
                     .chat-header { background: THEME_COLOR; color: white; padding: 20px; text-align: center; font-size: 1.25rem; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 10; display: flex; justify-content: space-between; align-items: center; }
                     .back-btn { color: white; text-decoration: none; font-size: 0.9rem; opacity: 0.8; transition: opacity 0.2s; }

@@ -8,15 +8,45 @@ namespace CustomWebServer.Core
     {
         // STEP 5: Cấu trúc dữ liệu ghi nhận hoạt động của phòng
         // Cấu trúc dữ liệu ghi nhận hoạt động của phòng
-        private static Dictionary<string, DateTime> _roomActivities = new Dictionary<string, DateTime>
-        {
-            { "all", DateTime.Now }
-        };
-        private static Dictionary<string, string> _roomNames = new Dictionary<string, string>
-        {
-            { "all", "Phòng Toàn Cầu (All)" }
-        };
+        private static Dictionary<string, DateTime> _roomActivities = new Dictionary<string, DateTime> { { "all", DateTime.Now } };
+        private static Dictionary<string, string> _roomNames = new Dictionary<string, string> { { "all", "Phòng Toàn Cầu (All)" } };
         private static Dictionary<string, HashSet<string>> _roomUsers = new Dictionary<string, HashSet<string>>();
+
+        class RoomMeta
+        {
+            public Dictionary<string, DateTime> Activities { get; set; }
+            public Dictionary<string, string> Names { get; set; }
+            public Dictionary<string, HashSet<string>> Users { get; set; }
+        }
+
+        static WebRouter()
+        {
+            try
+            {
+                if (System.IO.File.Exists("Data/rooms_meta.json"))
+                {
+                    var json = System.IO.File.ReadAllText("Data/rooms_meta.json");
+                    var meta = System.Text.Json.JsonSerializer.Deserialize<RoomMeta>(json);
+                    if (meta != null)
+                    {
+                        if (meta.Activities != null) _roomActivities = meta.Activities;
+                        if (meta.Names != null) _roomNames = meta.Names;
+                        if (meta.Users != null) _roomUsers = meta.Users;
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private static void SaveRoomsMeta()
+        {
+            try
+            {
+                var meta = new RoomMeta { Activities = _roomActivities, Names = _roomNames, Users = _roomUsers };
+                System.IO.File.WriteAllText("Data/rooms_meta.json", System.Text.Json.JsonSerializer.Serialize(meta));
+            }
+            catch { }
+        }
 
         public HttpResponse Route(HttpRequest request)
         {
@@ -83,7 +113,9 @@ namespace CustomWebServer.Core
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: 'Outfit', sans-serif; 
-            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            background-color: #f9f6f0;
+            background-image: linear-gradient(to right, #e8e4db 1px, transparent 1px), linear-gradient(to bottom, #e8e4db 1px, transparent 1px);
+            background-size: 30px 30px;
             min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
         }
         .top-right { position: fixed; top: 25px; right: 25px; }
@@ -110,9 +142,9 @@ namespace CustomWebServer.Core
             flex: 1; padding: 12px 16px; border: 1px solid #dfe6e9; border-radius: 10px; 
             font-size: 0.95rem; outline: none; transition: border-color 0.3s; font-family: 'Outfit', sans-serif; background: #fff;
         }
-        .action-form input:focus { border-color: #a18cd1; box-shadow: 0 0 0 3px rgba(161, 140, 209, 0.1); }
+        .action-form input:focus { border-color: #a68a64; box-shadow: 0 0 0 3px rgba(166, 138, 100, 0.1); }
         .action-form button { 
-            background: #6c5ce7; color: white; border: none; padding: 12px 20px; 
+            background: #a68a64; color: white; border: none; padding: 12px 20px; 
             border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s; 
             font-family: 'Outfit', sans-serif; white-space: nowrap;
         }
@@ -126,8 +158,8 @@ namespace CustomWebServer.Core
             padding: 18px 20px; background: white; border: 1px solid #dfe6e9; border-radius: 12px;
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        .room-item:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-color:#a18cd1; }
-        .room-link { text-decoration: none; color: #6c5ce7; font-weight: 600; font-size: 1.1rem; }
+        .room-item:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-color:#a68a64; }
+        .room-link { text-decoration: none; color: #a68a64; font-weight: 600; font-size: 1.1rem; }
         .room-link:hover { text-decoration: underline; }
         .status { padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
         .status.online { background: #dff9fb; color: #009432; }
@@ -140,7 +172,7 @@ namespace CustomWebServer.Core
 
     <div class='dashboard-card'>
         <div class='dashboard-header'>
-            <h1>Xin chào, <span style='color: #6c5ce7'>" + currentUser + @"</span>!</h1>
+            <h1>Xin chào, <span style='color: #a68a64'>" + currentUser + @"</span>!</h1>
         </div>
         
         <div class='action-cards'>
@@ -168,25 +200,31 @@ namespace CustomWebServer.Core
             foreach (var roomId in keys)
             {
                 var lastActivity = _roomActivities[roomId];
+                bool isOnline = true;
                 
                 // Toán tử kiểm tra sự kiện: DateTime.Now - LastActivityTime > 3 phút
                 if (roomId != "all" && (DateTime.Now - lastActivity).TotalMinutes > 3)
                 {
+                    isOnline = false;
                     // Dọn dẹp JSON
                     JsonDataManager.Instance.ClearRoomHistory(roomId);
                 }
+
+                // Chỉ hiển thị nếu user có trong danh sách _roomUsers hoặc là phòng "all"
+                bool isJoined = roomId == "all" || (_roomUsers.ContainsKey(roomId) && _roomUsers[roomId].Contains(currentUser));
+                if (!isJoined) continue;
+
+                hasActive = true;
+                string roomName = _roomNames.ContainsKey(roomId) ? _roomNames[roomId] : $"Phòng {roomId}";
+                html += $"<li class='room-item'>";
+                html += $"<div><a href='/chat/{roomId}' class='room-link'>{roomName}</a><div style='font-size: 0.8rem; color: #a4b0be; margin-top: 5px;'>ID: {roomId}</div></div>";
+                if (isOnline)
+                {
+                    html += $"<span class='status online'>Hoạt động</span></li>";
+                }
                 else
                 {
-                    // CHỈ hiển thị phòng nếu User hiện tại đã Tạo hoặc Join phòng này (ngoại trừ phòng "all")
-                    bool isJoined = roomId == "all" || (_roomUsers.ContainsKey(roomId) && _roomUsers[roomId].Contains(currentUser));
-                    if (isJoined)
-                    {
-                        hasActive = true;
-                        string roomName = _roomNames.ContainsKey(roomId) ? _roomNames[roomId] : $"Phòng {roomId}";
-                        html += $"<li class='room-item'>";
-                        html += $"<div><a href='/chat/{roomId}' class='room-link'>{roomName}</a><div style='font-size: 0.8rem; color: #a4b0be; margin-top: 5px;'>ID: {roomId}</div></div>";
-                        html += $"<span class='status online'>Hoạt động</span></li>";
-                    }
+                    html += $"<span class='status offline' style='background: #f5f6fa; color: #7f8fa6;'>Ngoại tuyến</span></li>";
                 }
             }
 
@@ -223,6 +261,7 @@ namespace CustomWebServer.Core
                 _roomUsers[roomId].Add(currentUser);
             }
             
+            SaveRoomsMeta();
             return HttpResponse.Redirect($"/chat/{roomId}");
         }
 
@@ -239,6 +278,7 @@ namespace CustomWebServer.Core
                 
                 // Cập nhật hoạt động: Đưa status phòng đó về lại bằng DateTime.Now
                 _roomActivities[roomId] = DateTime.Now;
+                SaveRoomsMeta();
             }
 
             // Redirect ngược lại endpoint lấy tin nhắn GET /chat/:id
@@ -250,12 +290,19 @@ namespace CustomWebServer.Core
             string currentUser = GetUsername(request);
             if (currentUser == null) return HttpResponse.Redirect("/login");
             
+            // Kiểm tra xem phòng có tồn tại không
+            if (roomId != "all" && !_roomActivities.ContainsKey(roomId))
+            {
+                return HttpResponse.HtmlResponse("<h1>Lỗi</h1><p>Phòng chat không tồn tại hoặc đã hết hạn!</p><a href='/chat'>Quay lại sảnh chờ</a>", 404);
+            }
+
             // Ghi nhận User này đã truy cập vào phòng (Join Room)
             if (!_roomUsers.ContainsKey(roomId)) _roomUsers[roomId] = new HashSet<string>();
             _roomUsers[roomId].Add(currentUser);
 
             // Cập nhật lại Activity để phòng sống lâu hơn nếu có người mới quan tâm
             _roomActivities[roomId] = DateTime.Now;
+            SaveRoomsMeta();
 
             var history = JsonDataManager.Instance.GetChatHistory(roomId);
             
@@ -265,7 +312,7 @@ namespace CustomWebServer.Core
             string headerTitle = $"{roomName} <small style='font-size: 0.8rem; font-weight: 400; opacity: 0.85; margin-left: 8px; background: rgba(0,0,0,0.15); padding: 3px 8px; border-radius: 10px;'>ID: {roomId}</small>";
             
             string html = builder
-                .SetTheme("#6c5ce7") // Màu sắc Theme Custom
+                .SetTheme("#a68a64") // Màu sắc Theme Custom
                 .SetCurrentUser(currentUser)
                 .AddHeader(headerTitle)
                 .AddMessageList(history)
@@ -315,7 +362,9 @@ namespace CustomWebServer.Core
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: 'Outfit', sans-serif; 
-            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            background-color: #f9f6f0;
+            background-image: linear-gradient(to right, #e8e4db 1px, transparent 1px), linear-gradient(to bottom, #e8e4db 1px, transparent 1px);
+            background-size: 30px 30px;
             height: 100vh; display: flex; align-items: center; justify-content: center;
         }
         .info-card {
@@ -328,16 +377,16 @@ namespace CustomWebServer.Core
         .info-list li { 
             margin-bottom: 12px; font-size: 1.05rem; color: #636e72; 
             padding: 12px 15px; background: #fdfdfd; border-radius: 8px; 
-            border-left: 4px solid #6c5ce7; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            border-left: 4px solid #a68a64; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
         .info-list strong { color: #2d3436; font-weight: 600; display: inline-block; min-width: 90px; }
         .btn-login {
-            display: inline-block; width: 100%; padding: 14px; background: #6c5ce7; 
+            display: inline-block; width: 100%; padding: 14px; background: #a68a64; 
             color: white; border: none; border-radius: 12px; text-decoration: none;
             font-size: 1.05rem; font-weight: 600; cursor: pointer; 
-            transition: all 0.3s; box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+            transition: all 0.3s; box-shadow: 0 4px 15px rgba(166, 138, 100, 0.3);
         }
-        .btn-login:hover { background: #5f27cd; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4); }
+        .btn-login:hover { background: #8e724f; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(166, 138, 100, 0.4); }
     </style>
 </head>
 <body>
@@ -440,7 +489,7 @@ namespace CustomWebServer.Core
             foreach (var pair in body.Split('&'))
             {
                 var kv = pair.Split('=');
-                if (kv.Length == 2) dict[Uri.UnescapeDataString(kv[0])] = Uri.UnescapeDataString(kv[1]);
+                if (kv.Length == 2) dict[Uri.UnescapeDataString(kv[0]).Replace('+', ' ')] = Uri.UnescapeDataString(kv[1].Replace('+', ' '));
             }
             return dict;
         }

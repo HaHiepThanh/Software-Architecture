@@ -16,7 +16,9 @@
 
         body {
             font-family: 'Outfit', sans-serif;
-            background: #CACACA;
+            background-color: #f9f6f0;
+            background-image: linear-gradient(to right, #e8e4db 1px, transparent 1px), linear-gradient(to bottom, #e8e4db 1px, transparent 1px);
+            background-size: 30px 30px;
             height: 100vh;
             display: flex;
             align-items: center;
@@ -73,7 +75,7 @@
         .btn-submit {
             width: 100%;
             padding: 14px;
-            background: #6c5ce7;
+            background: #a68a64;
             color: white;
             border: none;
             border-radius: 12px;
@@ -82,11 +84,11 @@
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+            box-shadow: 0 4px 15px rgba(166, 138, 100, 0.3);
         }
 
         .btn-submit:hover {
-            background: #5f27cd;
+            background: #8e724f;
             transform: translateY(-2px);
         }
 
@@ -196,7 +198,7 @@
         }
 
         .text-link {
-            color: #6c5ce7;
+            color: #a68a64;
             font-size: 0.95rem;
             text-decoration: none;
             cursor: pointer;
@@ -206,7 +208,7 @@
 
         .text-link:hover {
             text-decoration: underline;
-            color: #5f27cd;
+            color: #8e724f;
         }
     </style>
 </head>
@@ -285,6 +287,9 @@
         document.getElementById('btn-google-login').addEventListener('click', () => {
             signInWithPopup(auth, provider)
                 .then((result) => {
+                    // Log toàn bộ dữ liệu User ra màn hình Console (F12)
+                    console.log("🔥 Thông tin User lấy từ Google:", result.user);
+
                     // Trích xuất Tên người dùng (Display Name) thay vì Email
                     const displayName = result.user.displayName || result.user.email.split('@')[0];
 
